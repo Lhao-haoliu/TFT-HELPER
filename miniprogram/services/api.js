@@ -34,7 +34,11 @@ function uploadImageForOcr(imagePath, options = {}) {
           return;
         }
 
-        const message = (data && data.detail) || `OCR request failed (${statusCode})`;
+        const message =
+          (data &&
+            ((data.error && data.error.message) ||
+              (typeof data.detail === "string" ? data.detail : ""))) ||
+          `OCR request failed (${statusCode})`;
         if (showErrorToast) {
           wx.showToast({
             title: message,

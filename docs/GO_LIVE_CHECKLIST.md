@@ -66,6 +66,12 @@ python -m uvicorn app.main:app --app-dir src --host 0.0.0.0 --port $env:PORT
 - `ASSET_SYNC_WORKERS`
   - 默认：脚本内默认值
   - 作用：`tools/sync_augment_assets.py` 并发下载数
+- `OCR_MAX_UPLOAD_MB`
+  - 默认：`8`
+  - 作用：OCR 上传图片大小限制（MB）
+- `OCR_TIMEOUT_SECONDS`
+  - 默认：`15`
+  - 作用：OCR 单次请求处理超时（秒）
 
 ## 3. API 列表与示例请求
 

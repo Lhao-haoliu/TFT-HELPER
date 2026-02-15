@@ -1,0 +1,17 @@
+.git
+.gitignore
+.vscode
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+backend/.venv
+backend/.cache
+backend/tests
+
+miniprogram
+docs
+*.md

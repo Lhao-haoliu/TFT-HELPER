@@ -1,8 +1,12 @@
+import asyncio
 import logging
+import os
+import time
 from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .services.augment_mapping import AugmentMappingError
@@ -41,14 +45,114 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
 )
+logger = logging.getLogger("app.main")
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
+APP_HOST = os.getenv("HOST", "0.0.0.0")
+APP_PORT = _env_int("PORT", 8000)
+APP_VERSION = os.getenv("APP_VERSION", "dev")
+APP_COMMIT = os.getenv("COMMIT_SHA", "unknown")
+OCR_MAX_UPLOAD_MB = _env_float("OCR_MAX_UPLOAD_MB", 8.0)
+OCR_MAX_UPLOAD_BYTES = max(1, int(OCR_MAX_UPLOAD_MB * 1024 * 1024))
+OCR_TIMEOUT_SECONDS = max(1.0, _env_float("OCR_TIMEOUT_SECONDS", 15.0))
+CACHE_PERSIST_ENABLED = os.getenv("CACHE_PERSIST_ENABLED", "1")
+CACHE_PERSIST_PATH = os.getenv("CACHE_PERSIST_PATH", "")
+CACHE_REFRESH_INTERVAL_SECONDS = os.getenv("CACHE_REFRESH_INTERVAL_SECONDS", "")
+
+
+def _ocr_error(
+    *,
+    status_code: int,
+    code: str,
+    message: str,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "ok": False,
+            "error": {
+                "code": code,
+                "message": message,
+            },
+        },
+    )
+
+
 STATIC_DIR = Path(__file__).resolve().parents[2] / "static"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/static", CacheControlStaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
+@app.middleware("http")
+async def request_log_middleware(request: Request, call_next):
+    started = time.perf_counter()
+    method = request.method
+    path = request.url.path
+    try:
+        response = await call_next(request)
+    except Exception:
+        elapsed_ms = (time.perf_counter() - started) * 1000.0
+        logger.exception(
+            "request failed method=%s path=%s duration_ms=%.2f",
+            method,
+            path,
+            elapsed_ms,
+        )
+        raise
+
+    elapsed_ms = (time.perf_counter() - started) * 1000.0
+    logger.info(
+        "request method=%s path=%s status=%s duration_ms=%.2f",
+        method,
+        path,
+        response.status_code,
+        elapsed_ms,
+    )
+    return response
+
+
 @app.on_event("startup")
 def _startup_cache() -> None:
+    logger.info(
+        "startup config host=%s port=%s version=%s commit=%s",
+        APP_HOST,
+        APP_PORT,
+        APP_VERSION,
+        APP_COMMIT,
+    )
+    logger.info(
+        "startup config cache_persist_enabled=%s cache_persist_path=%s cache_refresh_interval_seconds=%s",
+        CACHE_PERSIST_ENABLED,
+        CACHE_PERSIST_PATH or "(default)",
+        CACHE_REFRESH_INTERVAL_SECONDS or "(daily-00:00)",
+    )
+    logger.info(
+        "startup config ocr_max_upload_mb=%.2f ocr_timeout_seconds=%.2f",
+        OCR_MAX_UPLOAD_MB,
+        OCR_TIMEOUT_SECONDS,
+    )
     cache_manager.start()
+    logger.info("startup cache manager ready")
 
 
 @app.on_event("shutdown")
@@ -315,39 +419,73 @@ async def battle_recommend(payload: dict[str, object]) -> dict[str, object]:
 @app.post("/api/ocr/augments-names")
 async def ocr_augment_names(
     request: Request,
-) -> dict[str, object]:
+) -> JSONResponse | dict[str, object]:
     content_type = (request.headers.get("content-type") or "").lower()
     if "multipart/form-data" not in content_type:
-        raise HTTPException(
+        return _ocr_error(
             status_code=400,
-            detail="multipart/form-data with 'image' field is required",
+            code="INVALID_CONTENT_TYPE",
+            message="multipart/form-data with 'image' field is required",
         )
+
+    content_length_raw = (request.headers.get("content-length") or "").strip()
+    if content_length_raw:
+        try:
+            content_length = int(content_length_raw)
+            if content_length > OCR_MAX_UPLOAD_BYTES:
+                return _ocr_error(
+                    status_code=413,
+                    code="FILE_TOO_LARGE",
+                    message=f"image payload exceeds {OCR_MAX_UPLOAD_MB:.2f} MB limit",
+                )
+        except ValueError:
+            pass
 
     try:
         form = await request.form()
     except Exception as exc:  # noqa: BLE001
-        raise HTTPException(
+        logger.exception("ocr form parse failed")
+        return _ocr_error(
             status_code=503,
-            detail=(
+            code="MULTIPART_UNAVAILABLE",
+            message=(
                 "multipart parser unavailable. Install dependency: "
                 "pip install python-multipart"
             ),
-        ) from exc
+        )
 
     image = form.get("image")
     if image is None:
-        raise HTTPException(status_code=400, detail="image field is required")
+        return _ocr_error(
+            status_code=400,
+            code="MISSING_IMAGE",
+            message="image field is required",
+        )
 
     image_content_type = str(getattr(image, "content_type", "")).lower()
     if image_content_type and not image_content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="image file is required")
+        return _ocr_error(
+            status_code=400,
+            code="INVALID_IMAGE_TYPE",
+            message="image file is required",
+        )
 
     if hasattr(image, "read"):
         payload = await image.read()
     else:
         payload = bytes(image)
     if not payload:
-        raise HTTPException(status_code=400, detail="empty image payload")
+        return _ocr_error(
+            status_code=400,
+            code="EMPTY_IMAGE",
+            message="empty image payload",
+        )
+    if len(payload) > OCR_MAX_UPLOAD_BYTES:
+        return _ocr_error(
+            status_code=413,
+            code="FILE_TOO_LARGE",
+            message=f"image payload exceeds {OCR_MAX_UPLOAD_MB:.2f} MB limit",
+        )
 
     try:
         augment_mapping = cache_manager.get_augment_mapping()
@@ -355,18 +493,54 @@ async def ocr_augment_names(
         augment_mapping = {}
 
     try:
-        result, _ = recognize_augment_names(
-            image_bytes=payload,
-            augment_mapping=augment_mapping,
-            keep_debug_images=False,
+        result, _ = await asyncio.wait_for(
+            asyncio.to_thread(
+                recognize_augment_names,
+                image_bytes=payload,
+                augment_mapping=augment_mapping,
+                keep_debug_images=False,
+            ),
+            timeout=OCR_TIMEOUT_SECONDS,
         )
-        return result
+        return {
+            "ok": True,
+            "names": result.get("names", []),
+            "debug": result.get("debug", {}),
+        }
+    except asyncio.TimeoutError:
+        logger.exception("ocr timed out")
+        return _ocr_error(
+            status_code=504,
+            code="OCR_TIMEOUT",
+            message=f"ocr exceeded timeout {OCR_TIMEOUT_SECONDS:.2f}s",
+        )
     except OcrInputError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return _ocr_error(
+            status_code=400,
+            code="OCR_INPUT_ERROR",
+            message=str(exc),
+        )
     except (OcrDependencyError, OcrEngineUnavailableError) as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        logger.exception("ocr dependency unavailable")
+        return _ocr_error(
+            status_code=503,
+            code="OCR_ENGINE_UNAVAILABLE",
+            message=str(exc),
+        )
     except OcrAugmentError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        logger.exception("ocr processing failed")
+        return _ocr_error(
+            status_code=500,
+            code="OCR_PROCESSING_ERROR",
+            message=str(exc),
+        )
+    except Exception:
+        logger.exception("unexpected ocr failure")
+        return _ocr_error(
+            status_code=500,
+            code="OCR_UNKNOWN_ERROR",
+            message="unexpected OCR failure",
+        )
 
 
 @app.post("/api/augments/resolve-names")

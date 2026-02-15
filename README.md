@@ -45,6 +45,7 @@ Health check:
 API reference:
 
 - `docs/API.md`
+- `docs/GO_LIVE_CHECKLIST.md` (production deployment checklist)
 - Local asset sync scripts: `backend/tools/sync_champion_assets.py`, `backend/tools/sync_augment_assets.py`
 
 ## Mini Program
