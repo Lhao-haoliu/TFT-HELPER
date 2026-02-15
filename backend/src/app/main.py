@@ -416,10 +416,10 @@ async def battle_recommend(payload: dict[str, object]) -> dict[str, object]:
     }
 
 
-@app.post("/api/ocr/augments-names")
+@app.post("/api/ocr/augments-names", response_model=None)
 async def ocr_augment_names(
     request: Request,
-) -> JSONResponse | dict[str, object]:
+) -> object:
     content_type = (request.headers.get("content-type") or "").lower()
     if "multipart/form-data" not in content_type:
         return _ocr_error(
