@@ -1,0 +1,102 @@
+﻿<view class="page-wrap champion-page">
+  <view class="apple-card champion-header">
+    <view class="hero-avatar-wrap">
+      <image
+        wx:if="{{!heroAvatarError}}"
+        class="hero-avatar"
+        src="{{heroIconUrl}}"
+        mode="aspectFill"
+        binderror="onHeroAvatarError"
+      />
+      <view wx:else class="hero-avatar hero-avatar-placeholder">?</view>
+    </view>
+
+    <view class="header-main">
+      <view class="h2 name">{{fullname_cn}}</view>
+      <view class="caption" wx:if="{{version}}">版本 {{version}}</view>
+    </view>
+  </view>
+
+  <view class="apple-card section">
+    <view class="section-top">
+      <view class="h2 section-title">海克斯推荐</view>
+    </view>
+
+    <view class="segment-row">
+      <view
+        class="segment-item {{activeRarityTab === item.value ? 'active' : ''}}"
+        wx:for="{{rarityTabs}}"
+        wx:key="value"
+        data-value="{{item.value}}"
+        bindtap="onChangeRarityTab"
+      >
+        {{item.label}}
+      </view>
+    </view>
+
+    <view class="sort-mode-row">
+      <view
+        class="mode-item {{sortMode === item.value ? 'active' : ''}}"
+        wx:for="{{sortModeTabs}}"
+        wx:key="value"
+        data-value="{{item.value}}"
+        bindtap="onChangeSortMode"
+      >
+        {{item.label}}
+      </view>
+    </view>
+
+    <view class="augment-list">
+      <view class="augment-row" wx:for="{{visibleAugmentList}}" wx:key="augmentId">
+        <view class="aug-left">
+          <view class="augment-icon rarity-{{item.rarity}}">
+            <image
+              wx:if="{{!augmentIconErrorMap[item.augmentId]}}"
+              class="augment-icon-img"
+              src="{{item.iconUrl}}"
+              mode="aspectFill"
+              data-id="{{item.augmentId}}"
+              binderror="onAugmentIconError"
+            />
+            <view wx:else class="augment-icon-placeholder">?</view>
+          </view>
+
+          <view class="aug-text">
+            <view class="aug-name">{{item.name_cn}}</view>
+            <view class="caption">{{item.tier}}</view>
+          </view>
+        </view>
+
+        <view class="aug-right">
+          <view class="metric success">{{item.winRateText}}</view>
+          <view class="metric">{{item.pickRateText}}</view>
+          <view class="metric-sub" wx:if="{{item.gamesText !== '-'}}">{{item.gamesText}} 场</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="status loading" wx:if="{{augmentLoading}}">加载中...</view>
+    <view class="status error" wx:if="{{errorAugments}}">{{errorAugments}}</view>
+    <view class="status empty" wx:if="{{!augmentLoading && visibleAugmentList.length === 0}}">暂无海克斯推荐数据</view>
+  </view>
+
+  <view class="apple-card section">
+    <view class="section-top">
+      <view class="h2 section-title">推荐海克斯组合</view>
+      <view class="caption">默认 TOP 10</view>
+    </view>
+
+    <view class="combo-list">
+      <view class="combo-row" wx:for="{{combos}}" wx:key="rank">
+        <view class="combo-rank">#{{item.rank}}</view>
+        <view class="combo-tags">
+          <view class="combo-tag" wx:for="{{item.augments}}" wx:key="augmentId">{{item.name_cn}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="status loading" wx:if="{{combosLoading}}">加载中...</view>
+    <view class="status error" wx:if="{{errorCombos}}">{{errorCombos}}</view>
+    <view class="status empty" wx:if="{{!combosLoading && combos.length === 0}}">暂无海克斯组合数据</view>
+  </view>
+</view>

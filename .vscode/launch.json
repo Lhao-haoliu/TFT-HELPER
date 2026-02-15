@@ -1,0 +1,22 @@
+﻿{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FastAPI (Monorepo Root)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "app.main:app",
+        "--app-dir",
+        "backend/src",
+        "--reload",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000"
+      ],
+      "jinja": true
+    }
+  ]
+}

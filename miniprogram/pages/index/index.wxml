@@ -1,0 +1,26 @@
+﻿<view class="page-wrap index-page">
+  <view class="hero-block">
+    <view class="h1">TFT Helper</view>
+    <view class="caption hero-sub">云顶数据速查与实战辅助</view>
+  </view>
+
+  <view class="entry-list">
+    <view class="apple-card entry-card" bindtap="goRank">
+      <view class="entry-icon">🏆</view>
+      <view class="entry-body">
+        <view class="entry-title">英雄胜率排行</view>
+        <view class="entry-desc">搜索、排序并查看英雄胜率与选取率</view>
+      </view>
+      <view class="entry-arrow">›</view>
+    </view>
+
+    <view class="apple-card entry-card" bindtap="goBattle">
+      <view class="entry-icon">⚔️</view>
+      <view class="entry-body">
+        <view class="entry-title">实战分析</view>
+        <view class="entry-desc">按当前阵容查看推荐海克斯与组合</view>
+      </view>
+      <view class="entry-arrow">›</view>
+    </view>
+  </view>
+</view>

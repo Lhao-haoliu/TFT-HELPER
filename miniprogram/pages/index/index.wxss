@@ -1,0 +1,60 @@
+﻿.index-page {
+  padding-top: 34rpx;
+}
+
+.hero-block {
+  margin-bottom: 26rpx;
+  padding: 10rpx 8rpx;
+}
+
+.hero-sub {
+  margin-top: 8rpx;
+}
+
+.entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.entry-card {
+  display: flex;
+  align-items: center;
+  min-height: 150rpx;
+}
+
+.entry-icon {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 20rpx;
+  background: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  margin-right: 20rpx;
+}
+
+.entry-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-title {
+  font-size: 34rpx;
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 6rpx;
+}
+
+.entry-desc {
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.entry-arrow {
+  font-size: 42rpx;
+  color: #9ca3af;
+  line-height: 1;
+  margin-left: 10rpx;
+}

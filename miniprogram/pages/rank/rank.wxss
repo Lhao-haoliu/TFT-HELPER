@@ -1,0 +1,180 @@
+﻿.rank-page {
+  padding-bottom: 30rpx;
+}
+
+.rank-toolbar {
+  position: sticky;
+  top: 14rpx;
+  z-index: 20;
+  margin-bottom: 14rpx;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 74rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid #e5e7eb;
+  background: #f9fafb;
+  padding: 0 20rpx;
+  font-size: 27rpx;
+}
+
+.search-btn {
+  height: 74rpx;
+  line-height: 74rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid #d1d5db;
+  background: #fff;
+  font-size: 26rpx;
+  color: #111827;
+  padding: 0 24rpx;
+}
+
+.sort-row {
+  display: flex;
+  gap: 10rpx;
+  margin-top: 14rpx;
+}
+
+.seg-btn {
+  flex: 1;
+  height: 64rpx;
+  line-height: 64rpx;
+  border-radius: 14rpx;
+  border: 1rpx solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  font-size: 24rpx;
+  padding: 0;
+}
+
+.seg-btn.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+.table-head {
+  position: sticky;
+  top: 292rpx;
+  z-index: 18;
+  display: flex;
+  align-items: center;
+  background: rgba(243, 244, 246, 0.96);
+  border-radius: 14rpx;
+  padding: 10rpx 14rpx;
+  margin-bottom: 10rpx;
+}
+
+.col {
+  font-size: 22rpx;
+  color: #6b7280;
+}
+
+.col-rank {
+  width: 74rpx;
+  text-align: center;
+}
+
+.col-hero {
+  flex: 1;
+  min-width: 0;
+}
+
+.col-rate {
+  width: 120rpx;
+  text-align: right;
+}
+
+.table-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.table-row {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 14rpx;
+}
+
+.rank-num {
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.hero-cell {
+  display: flex;
+  align-items: center;
+}
+
+.hero-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 16rpx;
+  background: #e5e7eb;
+  margin-right: 14rpx;
+  flex-shrink: 0;
+}
+
+.hero-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 30rpx;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f3f4f6, #d1d5db);
+}
+
+.hero-text {
+  min-width: 0;
+}
+
+.hero-name {
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.win {
+  font-weight: 700;
+}
+
+.status {
+  margin-top: 16rpx;
+  text-align: center;
+  font-size: 24rpx;
+}
+
+.loading {
+  color: #2563eb;
+}
+
+.error {
+  color: #dc2626;
+}
+
+.empty {
+  color: #6b7280;
+}
+
+.load-more {
+  margin-top: 18rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  font-size: 26rpx;
+}

@@ -1,0 +1,56 @@
+﻿page {
+  background: #f3f4f6;
+  color: #111827;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Helvetica Neue', sans-serif;
+}
+
+view,
+text,
+button,
+input {
+  box-sizing: border-box;
+}
+
+.page-wrap {
+  min-height: 100vh;
+  padding: 24rpx;
+  background: linear-gradient(180deg, #f7f8fa 0%, #eef1f5 100%);
+}
+
+.apple-card {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 20rpx;
+  padding: 24rpx;
+  box-shadow: 0 10rpx 24rpx rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(10rpx);
+}
+
+.h1 {
+  font-size: 44rpx;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #111827;
+}
+
+.h2 {
+  font-size: 34rpx;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #111827;
+}
+
+.body {
+  font-size: 28rpx;
+  line-height: 1.45;
+  color: #1f2937;
+}
+
+.caption {
+  font-size: 24rpx;
+  line-height: 1.4;
+  color: #6b7280;
+}
+
+.success {
+  color: #16a34a;
+}

@@ -1,0 +1,101 @@
+{
+  "description": "Arena augment OCR regression samples (derived from user-provided screenshot with synthetic perturbations)",
+  "samples": [
+    {
+      "file": "sample_01_base.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_02_bright.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_03_dark.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_04_contrast_up.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_05_contrast_down.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_06_rot_l.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_07_rot_r.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_08_blur.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_09_noise.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_10_persp.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_11_persp.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    },
+    {
+      "file": "sample_12_persp.jpg",
+      "expected": {
+        "left": "尤里卡",
+        "middle": "珠光护手",
+        "right": "炼狱导管"
+      }
+    }
+  ]
+}

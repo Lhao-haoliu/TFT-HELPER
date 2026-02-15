@@ -1,0 +1,218 @@
+﻿<view class="page-wrap battle-page">
+  <view class="battle-top apple-card">
+    <view class="h2">实战分析</view>
+    <view class="caption">先选英雄，再完成 4 轮海克斯决策</view>
+  </view>
+
+  <view class="status loading" wx:if="{{pageLoading}}">加载中...</view>
+  <view class="status error" wx:if="{{pageError}}">{{pageError}}</view>
+
+  <block wx:if="{{state.step === 'pickHero' && !pageLoading}}">
+    <view class="apple-card hero-picker">
+      <view class="section-title">Step A · 选择英雄</view>
+      <input
+        class="search-input"
+        placeholder="搜索英雄"
+        value="{{heroQuery}}"
+        bindinput="onHeroSearchInput"
+      />
+
+      <scroll-view class="hero-list" scroll-y>
+        <view class="hero-item" wx:for="{{filteredHeroes}}" wx:key="championId" data-id="{{item.championId}}" bindtap="onPickHero">
+          <image
+            wx:if="{{!heroAvatarErrorMap[item.championId]}}"
+            class="hero-avatar"
+            src="{{item.iconUrl}}"
+            mode="aspectFill"
+            data-id="{{item.championId}}"
+            binderror="onHeroAvatarError"
+          />
+          <view wx:else class="hero-avatar hero-avatar-placeholder">?</view>
+
+          <view class="hero-meta">
+            <view class="hero-name">{{item.fullname_cn}}</view>
+            <view class="caption">胜率 {{item.winRateText}}</view>
+          </view>
+          <view class="hero-enter">开始</view>
+        </view>
+      </scroll-view>
+    </view>
+  </block>
+
+  <block wx:if="{{state.step === 'round' && !pageLoading}}">
+    <view class="apple-card round-card">
+      <view class="round-header">
+        <view>
+          <view class="section-title">Step B · Round {{state.round}} / 4</view>
+          <view class="caption">英雄：{{state.champion.fullname_cn}}</view>
+        </view>
+        <image
+          wx:if="{{!currentHeroAvatarError}}"
+          class="hero-avatar"
+          src="{{state.champion.iconUrl}}"
+          mode="aspectFill"
+          binderror="onCurrentHeroAvatarError"
+        />
+        <view wx:else class="hero-avatar hero-avatar-placeholder">?</view>
+      </view>
+
+      <view class="round-steps">
+        <view class="round-step {{state.round >= 1 ? 'active' : ''}}">1</view>
+        <view class="round-step {{state.round >= 2 ? 'active' : ''}}">2</view>
+        <view class="round-step {{state.round >= 3 ? 'active' : ''}}">3</view>
+        <view class="round-step {{state.round >= 4 ? 'active' : ''}}">4</view>
+      </view>
+      <view class="caption">本轮流程：拍照识别（或手动添加）-> 选 1 个海克斯 -> 自动进入下一轮</view>
+
+      <view class="picked-line">
+        <view class="picked-chip" wx:for="{{pickedAugments}}" wx:key="augmentId">{{item.name_cn}}</view>
+        <view class="picked-empty" wx:if="{{state.picks.length === 0}}">本局尚未选择海克斯</view>
+      </view>
+
+      <view class="photo-card">
+        <view class="caption">本轮截图（拍照/相册后自动OCR识别）</view>
+        <view class="photo-actions">
+          <button class="small-btn" bindtap="onChooseRoundImage">拍照 / 相册</button>
+          <button class="small-btn" wx:if="{{currentRoundImage}}" bindtap="onPreviewRoundImage">预览</button>
+        </view>
+        <view class="ocr-status ocr-loading" wx:if="{{ocrLoading}}">正在识别候选海克斯...</view>
+        <view class="ocr-status ocr-error" wx:if="{{ocrError}}">{{ocrError}}</view>
+        <view class="ocr-fallback" wx:if="{{ocrError}}">
+          <button class="small-btn" bindtap="openCandidatePicker">识别失败，手动选择候选</button>
+        </view>
+        <image wx:if="{{currentRoundImage}}" class="photo-preview" src="{{currentRoundImage}}" mode="aspectFill" bindtap="onPreviewRoundImage" />
+      </view>
+    </view>
+
+    <view class="apple-card candidates-card">
+      <view class="section-title">候选海克斯（需凑满 3 个）</view>
+
+      <view class="candidate-list">
+        <view class="candidate-item" wx:for="{{state.candidates}}" wx:key="augmentId" data-id="{{item.augmentId}}" bindtap="onPickCandidate">
+          <view class="candidate-icon rarity-{{item.rarity}}">
+            <image
+              wx:if="{{!iconErrorMap[item.augmentId]}}"
+              class="candidate-icon-img"
+              src="{{item.iconUrl}}"
+              mode="aspectFill"
+              data-id="{{item.augmentId}}"
+              binderror="onCandidateIconError"
+            />
+            <view wx:else class="candidate-icon-fallback">?</view>
+          </view>
+
+          <view class="candidate-main">
+            <view class="candidate-name">{{item.name_cn}}</view>
+            <view class="caption">{{item.tier}} · 胜率 {{item.winRateText}} · 选取率 {{item.pickRateText}}</view>
+
+            <view class="reco-tags">
+              <view class="reco-tag single" wx:if="{{state.recommendSingle === item.augmentId}}">单胜率推荐</view>
+              <view class="reco-tag combo" wx:if="{{state.recommendCombo === item.augmentId}}">组合推荐</view>
+            </view>
+          </view>
+
+          <button class="mini-ghost" data-id="{{item.augmentId}}" catchtap="onRemoveCandidate">移除</button>
+        </view>
+      </view>
+
+      <view class="candidate-empty" wx:if="{{state.candidates.length === 0}}">还没有候选，先添加 3 个海克斯</view>
+
+      <view class="candidate-actions">
+        <button class="small-btn" bindtap="openCandidatePicker" disabled="{{state.candidates.length >= 3}}">添加候选</button>
+        <button class="small-btn" bindtap="onResetCurrentRound">重选本轮</button>
+      </view>
+    </view>
+
+    <view class="apple-card reco-card" wx:if="{{state.candidates.length >= 3}}">
+      <view class="section-title">推荐结果</view>
+      <view class="reco-line">
+        推荐A（单胜率）：{{state.recommendSingle ? state.recommendSingleName : '-'}}
+        <text wx:if="{{state.recommendSingle}}">（#{{state.recommendSingle}}）</text>
+      </view>
+      <view class="reco-line" wx:if="{{state.recommendCombo}}">
+        推荐B（组合）：{{state.recommendComboName}}
+        <text>（#{{state.recommendCombo}}）</text>
+      </view>
+      <view class="caption" wx:if="{{state.comboExplain}}">{{state.comboExplain}}</view>
+      <view class="caption" wx:if="{{!state.recommendCombo && state.round >= 2}}">前10组合未命中，本轮不显示组合推荐</view>
+    </view>
+
+    <view class="apple-card footer-actions">
+      <button class="primary-btn" bindtap="onEndBattleNow">结束并查看总结</button>
+    </view>
+  </block>
+
+  <block wx:if="{{state.step === 'done'}}">
+    <view class="apple-card done-card">
+      <view class="section-title">Step C · 结束总结</view>
+
+      <view class="done-hero">
+        <image
+          wx:if="{{!currentHeroAvatarError}}"
+          class="hero-avatar"
+          src="{{state.champion.iconUrl}}"
+          mode="aspectFill"
+          binderror="onCurrentHeroAvatarError"
+        />
+        <view wx:else class="hero-avatar hero-avatar-placeholder">?</view>
+        <view>
+          <view class="hero-name">{{state.champion.fullname_cn}}</view>
+          <view class="caption">共选择 {{state.picks.length}} 个海克斯</view>
+        </view>
+      </view>
+
+      <view class="picked-summary">
+        <view class="picked-item" wx:for="{{pickedAugments}}" wx:key="augmentId">
+          <view class="picked-index">{{index + 1}}</view>
+          <view class="picked-name">{{item.name_cn}}</view>
+          <view class="caption">{{item.tier}} · {{item.winRateText}}</view>
+        </view>
+      </view>
+
+      <view class="summary-box">{{summaryText}}</view>
+
+      <view class="done-actions">
+        <button class="small-btn" bindtap="onCopySummary">复制总结文本</button>
+        <button class="primary-btn" bindtap="onRestart">重新开始</button>
+      </view>
+    </view>
+  </block>
+
+  <view class="picker-mask" wx:if="{{pickerVisible}}" bindtap="closeCandidatePicker"></view>
+  <view class="picker-panel" wx:if="{{pickerVisible}}">
+    <view class="picker-header">
+      <view class="section-title">添加候选海克斯</view>
+      <view class="picker-close" bindtap="closeCandidatePicker">关闭</view>
+    </view>
+
+    <view class="picker-row">
+      <input
+        class="picker-input"
+        type="number"
+        placeholder="输入 augmentId，例如 1391"
+        value="{{pickerAugmentIdInput}}"
+        bindinput="onCandidateIdInput"
+      />
+      <button class="small-btn" bindtap="onAddCandidateById">添加ID</button>
+    </view>
+
+    <input
+      class="picker-input"
+      placeholder="搜索海克斯中文名"
+      value="{{pickerSearchInput}}"
+      bindinput="onCandidateSearchInput"
+    />
+
+    <scroll-view class="picker-list" scroll-y>
+      <view class="picker-item" wx:for="{{pickerSearchResults}}" wx:key="augmentId" data-id="{{item.augmentId}}" bindtap="onPickSearchResult">
+        <view class="candidate-icon rarity-{{item.rarity}}">
+          <image class="candidate-icon-img" src="{{item.iconUrl}}" mode="aspectFill" />
+        </view>
+        <view class="picker-meta">
+          <view class="picker-name">{{item.name_cn}}</view>
+          <view class="caption">#{{item.augmentId}} · {{item.rarity}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>

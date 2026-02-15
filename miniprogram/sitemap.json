@@ -1,0 +1,9 @@
+{
+  "desc": "TFT Helper sitemap",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    }
+  ]
+}

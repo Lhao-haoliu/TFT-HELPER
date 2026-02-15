@@ -1,0 +1,69 @@
+﻿<view class="page-wrap rank-page">
+  <view class="apple-card rank-toolbar">
+    <view class="h2">英雄胜率排行</view>
+
+    <view class="search-row">
+      <input
+        class="search-input"
+        placeholder="搜索英雄（中文名）"
+        value="{{qInput}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearchConfirm"
+        confirm-type="search"
+      />
+      <button class="search-btn" bindtap="onTapSearch">搜索</button>
+    </view>
+
+    <view class="sort-row">
+      <button class="seg-btn {{sort === 'winRate' ? 'active' : ''}}" data-sort="winRate" bindtap="onToggleSort">按胜率</button>
+      <button class="seg-btn {{sort === 'pickRate' ? 'active' : ''}}" data-sort="pickRate" bindtap="onToggleSort">按选取率</button>
+      <button class="seg-btn" bindtap="onToggleOrder">{{order === 'desc' ? '降序' : '升序'}}</button>
+    </view>
+  </view>
+
+  <view class="table-head">
+    <view class="col col-rank">排名</view>
+    <view class="col col-hero">英雄</view>
+    <view class="col col-rate">胜率</view>
+    <view class="col col-rate">选取率</view>
+  </view>
+
+  <view class="table-list">
+    <view
+      class="apple-card table-row"
+      wx:for="{{list}}"
+      wx:key="championId"
+      bindtap="onTapChampion"
+      data-id="{{item.championId}}"
+      data-fullname="{{item.fullname_cn}}"
+      data-icon="{{item.iconUrl}}"
+    >
+      <view class="col col-rank rank-num">{{item.rank}}</view>
+
+      <view class="col col-hero hero-cell">
+        <image
+          wx:if="{{!avatarErrorMap[item.championId]}}"
+          class="hero-avatar"
+          src="{{item.iconUrl}}"
+          mode="aspectFill"
+          data-id="{{item.championId}}"
+          binderror="onHeroAvatarError"
+        />
+        <view wx:else class="hero-avatar hero-avatar-placeholder">?</view>
+
+        <view class="hero-text">
+          <view class="hero-name">{{item.fullname_cn}}</view>
+        </view>
+      </view>
+
+      <view class="col col-rate win success">{{item.winRateText}}</view>
+      <view class="col col-rate">{{item.pickRateText}}</view>
+    </view>
+  </view>
+
+  <view class="status loading" wx:if="{{loading}}">加载中...</view>
+  <view class="status error" wx:if="{{error}}">{{error}}</view>
+  <view class="status empty" wx:if="{{!loading && list.length === 0}}">暂无数据</view>
+
+  <button class="load-more" wx:if="{{!loading && hasMore && list.length > 0}}" bindtap="onLoadMore">加载更多</button>
+</view>
