@@ -1,4 +1,4 @@
-﻿const {
+const {
   getChampions,
   getAugmentMapping,
   uploadImageForOcr,

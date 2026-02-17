@@ -1,4 +1,4 @@
-﻿<view class="page-wrap battle-page">
+<view class="page-wrap battle-page">
   <view class="battle-top apple-card">
     <view class="h2">实战分析</view>
     <view class="caption">先选英雄，再完成 4 轮海克斯决策</view>

@@ -1,4 +1,4 @@
-﻿const {
+const {
   getChampionAugments,
   getChampionCombos,
   getAugmentMapping
@@ -296,10 +296,16 @@ Page({
       errorAugments: null
     });
 
-    getChampionAugments(this.data.championId, {
-      sort: "winRate",
-      order: "desc"
-    })
+    getChampionAugments(
+      this.data.championId,
+      {
+        sort: "winRate",
+        order: "desc"
+      },
+      {
+        showLoading: false
+      }
+    )
       .then((rows) => {
         const mapping = this.data.augmentMapping || {};
         const normalized = Array.isArray(rows)
@@ -332,7 +338,13 @@ Page({
       errorCombos: null
     });
 
-    getChampionCombos(this.data.championId)
+    getChampionCombos(
+      this.data.championId,
+      {},
+      {
+        showLoading: false
+      }
+    )
       .then((res) => {
         const combos = Array.isArray(res.combos) ? res.combos.slice(0, 10) : [];
         const normalized = combos.map((combo) => {

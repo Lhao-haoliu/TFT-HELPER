@@ -1,4 +1,4 @@
-﻿const { getChampions } = require("../../services/api");
+const { getChampions } = require("../../services/api");
 const { API_BASE } = require("../../config");
 
 function toPercent(value) {

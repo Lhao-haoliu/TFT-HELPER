@@ -1,4 +1,4 @@
-﻿<view class="page-wrap champion-page">
+<view class="page-wrap champion-page">
   <view class="apple-card champion-header">
     <view class="hero-avatar-wrap">
       <image

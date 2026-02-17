@@ -24,7 +24,8 @@ function request(options) {
     data = {},
     showLoading = true,
     loadingText = "加载中",
-    showErrorToast = true
+    showErrorToast = true,
+    timeout = 12000
   } = options;
 
   if (!url) {
@@ -43,6 +44,7 @@ function request(options) {
       url: buildUrl(url),
       method,
       data,
+      timeout,
       success: (res) => {
         const { statusCode, data: resData } = res;
         if (statusCode >= 200 && statusCode < 300) {
