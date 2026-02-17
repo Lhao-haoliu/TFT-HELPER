@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 import json
@@ -78,6 +78,9 @@ def main() -> None:
     for idx, image in enumerate(artifacts.get("titles", [])):
         position = positions[idx] if idx < len(positions) else f"{idx + 1}"
         _save_image(output_dir / f"title_{position}.jpg", image)
+    for idx, image in enumerate(artifacts.get("titles_processed", [])):
+        position = positions[idx] if idx < len(positions) else f"{idx + 1}"
+        _save_image(output_dir / f"title_{position}_processed.jpg", image)
 
     print("[OCR backend]", result.get("debug", {}).get("engine"))
     print("[Detected names]")
@@ -89,11 +92,13 @@ def main() -> None:
 
     print("[Raw OCR debug]")
     for row in result.get("debug", {}).get("ocr", []):
+        top5 = row.get("candidates_top5")
         print(
             f"- {row.get('position')}: best_text={row.get('best_text')} "
-            f"best_conf={row.get('best_text_conf')} match={row.get('matched_name')} "
-            f"score={row.get('match_score')}"
+            f"best_conf={row.get('best_text_conf')} final={row.get('final')}"
         )
+        if isinstance(top5, list):
+            print(f"  top5={top5}")
 
     print("[Output files]", output_dir)
     print(json.dumps(result, ensure_ascii=False, indent=2))

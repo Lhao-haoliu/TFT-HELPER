@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import os
 import time
@@ -26,6 +27,7 @@ from .services.ocr_augments import (
     OcrDependencyError,
     OcrEngineUnavailableError,
     OcrInputError,
+    inspect_ocr_runtime,
     recognize_augment_names,
     resolve_augment_names,
 )
@@ -98,6 +100,36 @@ def _ocr_error(
     )
 
 
+def _parse_ui_rarities(raw: object) -> list[str]:
+    if raw is None:
+        return []
+
+    if isinstance(raw, list):
+        return [str(item or "").strip() for item in raw if str(item or "").strip()]
+
+    if isinstance(raw, str):
+        text = raw.strip()
+        if not text:
+            return []
+
+        try:
+            loaded = json.loads(text)
+            if isinstance(loaded, list):
+                return [
+                    str(item or "").strip()
+                    for item in loaded
+                    if str(item or "").strip()
+                ]
+        except Exception:
+            pass
+
+        if "," in text:
+            return [part.strip() for part in text.split(",") if part.strip()]
+        return [text]
+
+    return []
+
+
 STATIC_DIR = Path(__file__).resolve().parents[2] / "static"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/static", CacheControlStaticFiles(directory=str(STATIC_DIR)), name="static")
@@ -151,6 +183,8 @@ def _startup_cache() -> None:
         OCR_MAX_UPLOAD_MB,
         OCR_TIMEOUT_SECONDS,
     )
+    ocr_runtime = inspect_ocr_runtime()
+    logger.info("startup ocr runtime: %s", ocr_runtime)
     cache_manager.start()
     logger.info("startup cache manager ready")
 
@@ -492,6 +526,15 @@ async def ocr_augment_names(
     except AugmentMappingError:
         augment_mapping = {}
 
+    raw_rarities = (
+        form.getlist("rarities")
+        if hasattr(form, "getlist")
+        else form.get("rarities")
+    )
+    ui_rarities = _parse_ui_rarities(raw_rarities)
+    if not ui_rarities:
+        ui_rarities = _parse_ui_rarities(form.get("rarity"))
+
     try:
         result, _ = await asyncio.wait_for(
             asyncio.to_thread(
@@ -499,6 +542,7 @@ async def ocr_augment_names(
                 image_bytes=payload,
                 augment_mapping=augment_mapping,
                 keep_debug_images=False,
+                ui_rarities=ui_rarities,
             ),
             timeout=OCR_TIMEOUT_SECONDS,
         )

@@ -48,6 +48,16 @@ API reference:
 - `docs/GO_LIVE_CHECKLIST.md` (production deployment checklist)
 - Local asset sync scripts: `backend/tools/sync_champion_assets.py`, `backend/tools/sync_augment_assets.py`
 
+### OCR runtime note (Cloud deployment)
+
+- Docker image includes `tesseract-ocr` + `tesseract-ocr-chi-sim` for OCR.
+- If OCR still reports `tesseract is not installed or not in PATH`, your service is usually running an old image.
+- Rebuild/redeploy from latest Git commit (disable build cache if your platform supports it).
+- Startup logs now print `startup ocr runtime: {...}`. Verify:
+  - `pytesseract: True`
+  - `tesseract_cmd` is non-empty
+  - `tesseract_langs` contains `chi_sim`
+
 ## Mini Program
 
 1. Open WeChat DevTools

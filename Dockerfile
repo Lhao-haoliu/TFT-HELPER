@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxrender1 \
     tesseract-ocr \
+    tesseract-ocr-eng \
     tesseract-ocr-chi-sim \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
