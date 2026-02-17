@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsm6 \
     libxext6 \
     libxrender1 \
+    tesseract-ocr \
+    tesseract-ocr-chi-sim \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -28,4 +30,3 @@ EXPOSE 8000
 
 # CloudBase Run compatible command shape
 CMD ["sh", "-c", "uvicorn app.main:app --app-dir backend/src --host 0.0.0.0 --port ${PORT:-8000}"]
-
